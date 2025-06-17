@@ -9,10 +9,6 @@ from aiogram.types import Message, ReplyKeyboardRemove
 
 @dp.message_handler(commands="start")
 async def send(message: Message):
-    await message.answer("*Salom men orqali osongina konspekt qila olasiz shunchaki menga matn yuboring*",
+    await message.answer("*Salom*",
                          parse_mode="markdown")
 
-@dp.message_handler(commands="start")
-async def send(message: Message):
-    await message.answer("*Salom men orqali osongina konspekt qila olasiz shunchaki menga matn yuboring*",
-                         parse_mode="markdown")
