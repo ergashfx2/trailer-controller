@@ -28,7 +28,7 @@ async def process_batch(chat_id):
     media_messages = batch.get("media", [])
     final_text = batch.get("final_text").split(" ")
     facility = db.get_facility_by_group(facility_group=str(chat_id))
-    main_text = final_text[0] + " " + final_text[1] + "\n🚛 *Load* #" + final_text[4]  + "\n\n" + "📍 *Location:*  " + facility[3] + "\n\nDate :" + str(datetime.date.today())
+    main_text = final_text[0] + " " + final_text[1] + "\n🚛 *Load* #" + final_text[3]  + "\n\n" + "📍 *Location:*  " + facility[3] + "\n\nDate :" + str(datetime.date.today())
 
     for msg in media_messages:
         try:
