@@ -318,3 +318,63 @@ async def delete_facility_handler(message: types.Message, state: FSMContext):
     except Exception:
         await message.answer("❌ Invalid ID or database error.")
     await state.finish()
+
+
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+@dp.message_handler(lambda msg: msg.text == "/trailers")
+async def show_facilities_inline(message: types.Message):
+    facilities = db.get_facility()
+    if not facilities:
+        await message.answer("⚠️ No facilities found.")
+        return
+
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    for f in facilities:
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f[1],  # Facility name
+                callback_data=f"facility_{f[0]}"
+            )
+        )
+    await message.answer("🏢 Select a facility to view dropped trailers:", reply_markup=keyboard)
+
+@dp.callback_query_handler(lambda call: call.data.startswith("facility_"))
+async def show_dropped_trailers_by_facility(call: types.CallbackQuery):
+    facility_id = int(call.data.split("_")[1])
+    trailers = db.get_dropped_trailers_by_facility(facility_id)
+
+    facility = db.get_facility_by_id(facility_id)
+    facility_name = facility[1] if facility else "Unknown"
+
+    if not trailers:
+        text = f"❌ No *dropped* trailers found for *{facility_name}*."
+    else:
+        trailer_list = "\n".join(f"🚛 {t[0]}" for t in trailers)
+        text = f"📦 *Dropped Trailers for {facility_name}:*\n\n{trailer_list}"
+
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton("🔙 Back", callback_data="back_to_facilities"))
+
+    await call.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+    await call.answer()
+
+@dp.callback_query_handler(lambda call: call.data == "back_to_facilities")
+async def back_to_facilities(call: types.CallbackQuery):
+    facilities = db.get_facility()
+    if not facilities:
+        await call.message.edit_text("⚠️ No facilities found.")
+        return
+
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    for f in facilities:
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f[1],
+                callback_data=f"facility_{f[0]}"
+            )
+        )
+
+    await call.message.edit_text("🏢 Select a facility to view dropped trailers:", reply_markup=keyboard)
+    await call.answer()
+

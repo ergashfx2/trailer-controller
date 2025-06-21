@@ -48,6 +48,7 @@ async def process_batch(chat_id):
 
     final_text = final_text.split(" ")
     facility = db.get_facility_by_group(facility_group=str(chat_id))
+    print(facility)
     main_text = (
         final_text[0] + " " + final_text[1] +
         "\n🚛 *Load* #" + final_text[3] +
@@ -89,6 +90,15 @@ async def process_batch(chat_id):
             await bot.send_document(chat_id=facility[4], document=InputFile(pdf_path))
         except Exception as e:
             print(f"Failed to send PDF: {e}")
+
+        try:
+            trailer_number = final_text[1].lower()
+            trailer_status = final_text[0].lower()
+            print(facility[0])
+            db.add_trailer(trailer=trailer_number, status=trailer_status, facility=facility[0])
+            print(f"✅ Trailer {trailer_number} added to DB.")
+        except Exception as e:
+            print(f"❌ Failed to add trailer: {e}")
 
     shutil.rmtree(temp_dir, ignore_errors=True)
     reset_batch(chat_id)

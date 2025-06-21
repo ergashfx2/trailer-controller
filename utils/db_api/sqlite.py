@@ -150,9 +150,65 @@ CREATE TABLE Users (
         sql = f"""SELECT * FROM facility WHERE facility_group=?"""
         return self.execute(sql, parameters=(facility_group,), fetchone=True)
 
+
+    def get_facility_by_id(self,facility_id):
+        sql = f"""SELECT * FROM facility WHERE id=?"""
+        return self.execute(sql, parameters=(facility_id,), fetchone=True)
+
     def delete_facility(self,f_id):
         sql = f"""DELETE FROM facility WHERE id=?"""
         return self.execute(sql, parameters=(f_id,), commit=True)
+
+    def add_trailer(self, trailer, status, facility):
+        sql = """INSERT INTO trailers (trailer, status, facility) VALUES (?, ?, ?)"""
+        return self.execute(sql, parameters=(trailer, status, facility), commit=True)
+
+    def get_all_trailers(self):
+        sql = """SELECT * FROM trailers"""
+        return self.execute(sql, fetchall=True)
+
+    def get_trailer_by_id(self, trailer_id):
+        sql = """SELECT * FROM trailers WHERE id=?"""
+        return self.execute(sql, parameters=(trailer_id,), fetchone=True)
+
+    def update_trailer(self, trailer_id, trailer=None, status=None, facility=None):
+        updates = []
+        parameters = []
+
+        if trailer is not None:
+            updates.append("trailer=?")
+            parameters.append(trailer)
+        if status is not None:
+            updates.append("status=?")
+            parameters.append(status)
+        if facility is not None:
+            updates.append("facility=?")
+            parameters.append(facility)
+
+        parameters.append(trailer_id)
+        sql = f"""UPDATE trailers SET {', '.join(updates)} WHERE id=?"""
+        return self.execute(sql, parameters=tuple(parameters), commit=True)
+
+    def delete_trailer(self, trailer_id):
+        sql = """DELETE FROM trailers WHERE id=?"""
+        return self.execute(sql, parameters=(trailer_id,), commit=True)
+
+    def delete_trailer_by_name(self, trailer_name):
+        sql = """DELETE FROM trailers WHERE trailer = ?"""
+        return self.execute(sql, parameters=(trailer_name,), commit=True)
+
+    def get_trailers_by_facility(self, facility_id):
+        sql = """
+        SELECT trailers.id, trailers.trailer, trailers.status, trailers.facility
+        FROM trailers
+        WHERE facility = ?
+        """
+        return self.execute(sql, parameters=(facility_id,), fetchall=True)
+
+    def get_dropped_trailers_by_facility(self, facility_id):
+        sql = """SELECT trailer FROM trailers WHERE facility = ? AND status = 'dropped'"""
+        return self.execute(sql, parameters=(facility_id,), fetchall=True)
+
 
 db = Database()
 
