@@ -6,7 +6,7 @@ from aiogram import types
 
 from loader import dp,bot
 from aiogram.types import ContentType
-
+from filters.group import IsPDFGroup
 from utils.db_api.sqlite import db
 import os
 from PIL import Image
@@ -79,7 +79,7 @@ async def make_pdf(chat_id: int):
     buffer["timer"] = None
 
 
-@dp.message_handler(content_types=[ContentType.PHOTO])
+@dp.message_handler(IsPDFGroup(),content_types=[ContentType.PHOTO])
 async def handle_photo(message: types.Message):
     """Collect photos and debounce to create PDF per chat."""
     if message.chat.id != -1003341826791:
